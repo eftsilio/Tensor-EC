@@ -1,0 +1,79 @@
+/******************************* FORGET MECHANISM *********************************/
+
+
+% the rule below deals with the case in which the input stream is not temporally sorted
+forget(InitTime) :-
+	nextTimePoint(InitTime, NewInitTime),
+	% forget input entities/events
+	findall(E, (happensAtIE(E, T), T=<InitTime, retract(happensAtIE(E, T))), _),
+	% forget the intervals of input entities/statically determined fluents
+	findall(E, (holdsForIESI(E, (Start,End)), dealWithInputFluents(E, Start, End, InitTime, NewInitTime)), _).
+
+
+% if the entity starts after Qi-WM then keep it (do nothing)
+dealWithInputFluents(_E, Start, _End, InitTime, _NewInitTime) :-
+	Start>InitTime, !.
+
+% if the entity ends before Qi-WM then delete it
+dealWithInputFluents(E, Start, End, InitTime, _NewInitTime) :-
+	End=<InitTime,
+	retract(holdsForIESI(E,(Start,End))), gc_dynamic(_N), !.
+
+% if the entity starts before or on Qi-WM and ends after Qi-WM then break it
+dealWithInputFluents(E, Start, End, _InitTime, NewInitTime) :-
+	retract(holdsForIESI(E,(Start,End))), gc_dynamic(_N), !, 
+	\+ NewInitTime=End,
+	assert(holdsForIESI(E,(NewInitTime,End))).
+
+
+/************************************************************************************************** 
+ Compute the list of time-points of input entities/statically determined fluents.
+ If the intervals of the input entities are provided then we simply collect these intervals 
+ and store them in a list of time-points.
+ **************************************************************************************************/
+
+inputProcessing :-
+	% build the list of time-points input entity/statically determined fluent holds
+	findall(F=V, 
+		(
+			collectPoints(Index, F=V),
+			processIECollectP(Index, F=V)
+		), _).
+
+%%%%%%% processIECollectP
+
+processIECollectP(Index, F=V) :-
+	iePList(Index, F=V, _), !,
+	retract(iePList(Index, F=V, _)),
+	gc_dynamic(_N),
+	holdsForIE(collectPoints, F=V, NewPoints),
+	updateiePList(Index, F=V, NewPoints). 
+
+% this predicate deals with the case where no time-points for F=V were computed at the previous query time
+processIECollectP(Index, F=V) :-
+	holdsForIE(collectPoints, F=V, NewPoints),
+	updateiePList(Index, F=V, NewPoints).
+
+
+
+%%%%%%% updateiePList
+
+% if no IE time-points have been computed then do not assert anything
+updateiePList(_Index, _U, []) :- !.
+
+updateiePList(Index, F=V, NewPeriods) :-
+	assert(iePList(Index, F=V, NewPeriods)).
+
+
+%%%%%%% holdsForIE --- collectPoints
+
+% collect the list of time-points; setof sorts the list of time-points
+holdsForIE(collectPoints, IE, L2) :-
+ 	setof(SingleI, (holdsForIESI(IE, SingleI)), L), !,
+	holdsAtCE(L, L2).
+	
+
+% if there is no holdsForIESI in the input then setof will fail
+% in this case return the empty list of intervals
+holdsForIE(collectPoints, _IE, []).
+

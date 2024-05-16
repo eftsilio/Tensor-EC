@@ -1,0 +1,41 @@
+
+max(X,Y,Y) :- geq(Y, X), !.
+max(X,Y,X) :- geq(X, Y), !.
+max(_X,inf,inf) :- !.
+max(inf, _X, inf).
+
+min(X,Y,Y) :- geq(X, Y), !.
+min(X,Y,X) :- geq(Y, X), !. 
+min(X,inf,X) :- !.
+min(inf,X,X).
+
+
+gt(_X,inf) :- !, fail.
+gt(inf,_Y) :- !.
+gt(X,Y) :- X>Y.
+%%% gt(X,Y) :- \+(Y=inf), X>Y.
+
+geq(_X,inf) :- !, fail.
+geq(inf,_Y) :- !.
+geq(X,Y) :- X>=Y.
+
+lt(inf,_Y) :- !, fail.
+lt(_X, inf) :- !.
+lt(X,Y) :- X<Y.
+
+leq(inf,_Y) :- !, fail.
+leq(_X, inf) :- !.
+leq(X,Y) :- X=<Y.
+
+
+/************* next & previous time-point *********************/
+
+% the next and previous time-points are defined based on 
+% the temporal distance between two time-points
+
+nextTimePoint(inf, inf) :- !.
+
+nextTimePoint(T, NextT) :-
+	temporalDistance(TD),
+	NextT is T+TD-(T mod TD). 
+

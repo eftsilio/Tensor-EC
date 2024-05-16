@@ -1,0 +1,314 @@
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% GAP %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+initiatedAt(gap(Index)=nearPort, InitTime, T, EndTime) :-
+     happensAtProcessedStaticIE(gap_start(Index),T), InitTime =< T, T =< EndTime,
+     holdsAtProcessedSimpleFluent(Index, withinArea(Index,nearPorts)=true, T), InitTime =< T, T =< EndTime.
+     
+initiatedAt(gap(Index)=farFromPorts, InitTime, T, EndTime) :-
+     happensAtProcessedStaticIE(gap_start(Index),T), InitTime =< T, T =< EndTime,
+     \+ holdsAtProcessedSimpleFluent(Index, withinArea(Index,nearPorts)=true, T), InitTime =< T, T =< EndTime.
+
+terminatedAt(gap(Index)=_PortStatus, InitTime, T, EndTime) :-
+     happensAtProcessedStaticIE(gap_end(Index),T), InitTime =< T, T =< EndTime.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% STOPPED %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+     
+initiatedAt(stopped(Index)=nearPort, InitTime, T, EndTime) :-
+     happensAtProcessedStaticIE(stop_start(Index), T), InitTime =< T, T =< EndTime,
+     \+ happensAtProcessedStaticIE(gap_start(Index), T), InitTime =< T, T =< EndTime,
+     holdsAtProcessedSimpleFluent(Index, withinArea(Index,nearPorts)=true, T), InitTime =< T, T =< EndTime.
+
+initiatedAt(stopped(Index)=farFromPorts, InitTime, T, EndTime) :-
+     happensAtProcessedStaticIE(stop_start(Index), T), InitTime =< T, T =< EndTime,
+     \+ happensAtProcessedStaticIE(gap_start(Index), T), InitTime =< T, T =< EndTime,
+     \+ holdsAtProcessedSimpleFluent(Index, withinArea(Index,nearPorts)=true, T), InitTime =< T, T =< EndTime.
+
+terminatedAt(stopped(Index)=_PortStatus, InitTime, T, EndTime) :-
+     happensAtProcessedStaticIE(stop_end(Index), T), InitTime =< T, T =< EndTime.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% LOWSPEED %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+initiatedAt(lowSpeed(Index)=true, InitTime, T, EndTime) :-
+     happensAtProcessedStaticIE(slow_motion_start(Index), T), InitTime =< T, T =< EndTime,
+     \+ happensAtProcessedStaticIE(gap_start(Index), T), InitTime =< T, T =< EndTime.
+     
+terminatedAt(lowSpeed(Index)=true, InitTime, T, EndTime) :-
+     happensAtProcessedStaticIE(slow_motion_end(Index), T), InitTime =< T, T =< EndTime.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% WITHIN_AREA %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+initiatedAt(withinArea(Index,anchorage)=true, InitTime, T, EndTime) :-
+     happensAtProcessedStaticIE(entersArea_anchorage(Index), T), InitTime =< T, T =< EndTime.
+
+initiatedAt(withinArea(Index,fishing)=true, InitTime, T, EndTime) :-
+     happensAtProcessedStaticIE(entersArea_fishing(Index), T), InitTime =< T, T =< EndTime.
+
+initiatedAt(withinArea(Index,natura)=true, InitTime, T, EndTime) :-
+     happensAtProcessedStaticIE(entersArea_natura(Index), T), InitTime =< T, T =< EndTime.
+
+initiatedAt(withinArea(Index,nearCoast)=true, InitTime, T, EndTime) :-
+     happensAtProcessedStaticIE(entersArea_nearCoast(Index), T), InitTime =< T, T =< EndTime.
+
+initiatedAt(withinArea(Index,nearCoast5k)=true, InitTime, T, EndTime) :-
+     happensAtProcessedStaticIE(entersArea_nearCoast5k(Index), T), InitTime =< T, T =< EndTime.
+
+initiatedAt(withinArea(Index,nearPorts)=true, InitTime, T, EndTime) :-
+     happensAtProcessedStaticIE(entersArea_nearPorts(Index), T), InitTime =< T, T =< EndTime.
+     
+terminatedAt(withinArea(Index,anchorage)=true, InitTime, T, EndTime) :-
+     happensAtProcessedStaticIE(leavesArea_anchorage(Index), T), InitTime =< T, T =< EndTime.
+
+terminatedAt(withinArea(Index,fishing)=true, InitTime, T, EndTime) :-
+     happensAtProcessedStaticIE(leavesArea_fishing(Index), T), InitTime =< T, T =< EndTime.
+
+terminatedAt(withinArea(Index,natura)=true, InitTime, T, EndTime) :-
+     happensAtProcessedStaticIE(leavesArea_natura(Index), T), InitTime =< T, T =< EndTime.
+
+terminatedAt(withinArea(Index,nearCoast)=true, InitTime, T, EndTime) :-
+     happensAtProcessedStaticIE(leavesArea_nearCoast(Index), T), InitTime =< T, T =< EndTime.
+
+terminatedAt(withinArea(Index,nearCoast5k)=true, InitTime, T, EndTime) :-
+     happensAtProcessedStaticIE(leavesArea_nearCoast5k(Index), T), InitTime =< T, T =< EndTime.
+
+terminatedAt(withinArea(Index,nearPorts)=true, InitTime, T, EndTime) :-
+     happensAtProcessedStaticIE(leavesArea_nearPorts(Index), T), InitTime =< T, T =< EndTime.
+
+terminatedAt(withinArea(Index,_)=true, InitTime, T, EndTime) :-
+     happensAtProcessedStaticIE(gap_start(Index), T), InitTime =< T, T =< EndTime.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% UNDER_WAY %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%     
+     
+initiatedAt(underWay(Index)=true, InitTime, T, EndTime) :-
+     happensAtProcessedStaticIE(velocityGr2_7Lt48_6(Index), T), InitTime =< T, T =< EndTime,
+     \+ happensAtProcessedStaticIE(gap_start(Index), T), InitTime =< T, T =< EndTime.
+
+terminatedAt(underWay(Index)=true, InitTime, T, EndTime) :-
+     happensAtProcessedStaticIE(velocityGr48_6(Index), T), InitTime =< T, T =< EndTime.
+
+terminatedAt(underWay(Index)=true, InitTime, T, EndTime) :-
+     happensAtProcessedStaticIE(velocityLt2_7(Index), T), InitTime =< T, T =< EndTime.
+
+     
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% ADRIFT %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%          
+
+initiatedAt(adrift(Index)=true, InitTime, T, EndTime) :-
+     happensAtProcessedStaticIE(velocityAngleGr15(Index), T), InitTime =< T, T =< EndTime,
+     \+ happensAtProcessedStaticIE(gap_start(Index), T), InitTime =< T, T =< EndTime,
+     holdsAtProcessedSimpleFluent(Index, underWay(Index)=true, T), InitTime =< T, T =< EndTime.
+
+terminatedAt(adrift(Index)=true, InitTime, T, EndTime) :-
+     happensAtProcessedStaticIE(velocityAngleLe15(Index), T), InitTime =< T, T =< EndTime,
+     \+ happensAtProcessedStaticIE(gap_start(Index), T), InitTime =< T, T =< EndTime,
+     holdsAtProcessedSimpleFluent(Index, underWay(Index)=true, T), InitTime =< T, T =< EndTime.
+
+terminatedAt(adrift(Index)=true, InitTime, T, EndTime) :-
+     happensAtProcessedStaticIE(velocity(Index), T), InitTime =< T, T =< EndTime,
+     \+ holdsAtProcessedSimpleFluent(Index, underWay(Index)=true, T), InitTime =< T, T =< EndTime.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% BEFOREAGROUND %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%               
+
+initiatedAt(beforeaground(Index)=nearPort, InitTime, T, EndTime) :-
+     happensAtProcessedStaticIE(velocityLt0_005(Index), T), InitTime =< T, T =< EndTime,
+     \+ happensAtProcessedStaticIE(gap_start(Index), T), InitTime =< T, T =< EndTime,
+     holdsAtProcessedSimpleFluent(Index, withinArea(Index,nearPorts)=true, T), InitTime =< T, T =< EndTime.
+
+initiatedAt(beforeaground(Index)=farFromPorts, InitTime, T, EndTime) :-
+     happensAtProcessedStaticIE(velocityLt0_005(Index), T), InitTime =< T, T =< EndTime,
+     \+ happensAtProcessedStaticIE(gap_start(Index), T), InitTime =< T, T =< EndTime,
+     \+ holdsAtProcessedSimpleFluent(Index, withinArea(Index,nearPorts)=true, T), InitTime =< T, T =< EndTime.     
+     
+terminatedAt(beforeaground(Index)=_, InitTime, T, EndTime) :-
+     happensAtProcessedStaticIE(velocityGr0_005(Index), T), InitTime =< T, T =< EndTime.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% ANCHOR %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+initiatedAt(anchor(Index)=nearPort, InitTime, T, EndTime) :-
+     happensAtProcessedStaticIE(velocityLt0_2(Index), T), InitTime =< T, T =< EndTime,
+     \+ happensAtProcessedStaticIE(gap_start(Index), T), InitTime =< T, T =< EndTime,
+     holdsAtProcessedSimpleFluent(Index, withinArea(Index,nearPorts)=true, T), InitTime =< T, T =< EndTime.
+
+initiatedAt(anchor(Index)=farFromPorts, InitTime, T, EndTime) :-
+     happensAtProcessedStaticIE(velocityLt0_2(Index), T), InitTime =< T, T =< EndTime,
+     \+ happensAtProcessedStaticIE(gap_start(Index), T), InitTime =< T, T =< EndTime,
+     \+ holdsAtProcessedSimpleFluent(Index, withinArea(Index,nearPorts)=true, T), InitTime =< T, T =< EndTime.
+
+terminatedAt(anchor(Index)=nearPort, InitTime, T, EndTime) :-
+     happensAtProcessedStaticIE(coord(Index), T), InitTime =< T, T =< EndTime,
+     \+ holdsAtProcessedSimpleFluent(Index, withinArea(Index,nearPorts)=true, T), InitTime =< T, T =< EndTime.
+     
+terminatedAt(anchor(Index)=farFromPorts, InitTime, T, EndTime) :-
+     happensAtProcessedStaticIE(coord(Index), T), InitTime =< T, T =< EndTime,
+     holdsAtProcessedSimpleFluent(Index, withinArea(Index,nearPorts)=true, T), InitTime =< T, T =< EndTime.
+
+terminatedAt(anchor(Index)=_, InitTime, T, EndTime) :-
+     happensAtProcessedStaticIE(velocityGr0_2(Index), T), InitTime =< T, T =< EndTime.
+     
+     
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TRAWLSPEED %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%     
+
+initiatedAt(trawlSpeed(Index)=true, InitTime, T, EndTime) :-
+     happensAtProcessedStaticIE(velocityGr1Lt9(Index), T), InitTime =< T, T =< EndTime,
+     \+ happensAtProcessedStaticIE(gap_start(Index), T), InitTime =< T, T =< EndTime,
+     \+ holdsAtProcessedSimpleFluent(Index, withinArea(Index,nearPorts)=true, T), InitTime =< T, T =< EndTime.
+
+terminatedAt(trawlSpeed(Index)=true, InitTime, T, EndTime) :-
+     happensAtProcessedStaticIE(velocityGr9(Index), T), InitTime =< T, T =< EndTime.
+
+terminatedAt(trawlSpeed(Index)=true, InitTime, T, EndTime) :-
+     happensAtProcessedStaticIE(velocityLt1(Index), T), InitTime =< T, T =< EndTime.
+
+terminatedAt(trawlSpeed(Index)=true, InitTime, T, EndTime) :-
+     happensAtProcessedStaticIE(coord(Index), T), InitTime =< T, T =< EndTime,
+     holdsAtProcessedSimpleFluent(Index, withinArea(Index,nearPorts)=true, T), InitTime =< T, T =< EndTime.
+     
+     
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TRAVELSPEED %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+     
+initiatedAt(travelSpeed(Index)=true, InitTime, T, EndTime) :-
+     happensAtProcessedStaticIE(velocityGrMinLtMax(Index), T), InitTime =< T, T =< EndTime,
+     \+ happensAtProcessedStaticIE(gap_start(Index), T), InitTime =< T, T =< EndTime.
+
+terminatedAt(travelSpeed(Index)=true, InitTime, T, EndTime) :-
+     happensAtProcessedStaticIE(velocityLtMin(Index), T), InitTime =< T, T =< EndTime.
+
+terminatedAt(travelSpeed(Index)=true, InitTime, T, EndTime) :-
+     happensAtProcessedStaticIE(velocityGrMax(Index), T), InitTime =< T, T =< EndTime.
+     
+     
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% speedLessThanMin %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+     
+initiatedAt(speedLessThanMin(Index)=true, InitTime, T, EndTime) :-
+     happensAtProcessedStaticIE(velocityLtMin(Index), T), InitTime =< T, T =< EndTime,
+     \+ happensAtProcessedStaticIE(gap_start(Index), T), InitTime =< T, T =< EndTime.
+
+terminatedAt(speedLessThanMin(Index)=true, InitTime, T, EndTime) :-
+     happensAtProcessedStaticIE(velocityGeMin(Index), T), InitTime =< T, T =< EndTime.
+     
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% speedGrThanMax %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+initiatedAt(speedGrThanMax(Index)=true, InitTime, T, EndTime) :-
+     happensAtProcessedStaticIE(velocityGrMax(Index), T), InitTime =< T, T =< EndTime,
+     \+ happensAtProcessedStaticIE(gap_start(Index), T), InitTime =< T, T =< EndTime.
+
+terminatedAt(speedGrThanMax(Index)=true, InitTime, T, EndTime) :-
+     happensAtProcessedStaticIE(velocityLeMax(Index), T), InitTime =< T, T =< EndTime.
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% rendezVous %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+initiatedAt(rendezVous(Index,Index2)=true, InitTime, T, EndTime) :-
+	happensAtProcessedStaticIE(stop_start(Index), T), InitTime =< T, T =< EndTime,
+     \+ happensAtProcessedStaticIE(gap_start(Index), T), InitTime =< T, T =< EndTime,
+     \+ holdsAtProcessedSimpleFluent(Index, withinArea(Index,nearPorts)=true, T), InitTime =< T, T =< EndTime,
+	holdsAtProcessedIE(Index, proximity(Index,Index2)=true, T), InitTime =< T, T =< EndTime.
+
+initiatedAt(rendezVous(Index,Index2)=true, InitTime, T, EndTime) :-
+	happensAtProcessedStaticIE(slow_motion_start(Index), T), InitTime =< T, T =< EndTime,
+     \+ happensAtProcessedStaticIE(gap_start(Index), T), InitTime =< T, T =< EndTime,
+	holdsAtProcessedIE(Index, proximity(Index,Index2)=true, T), InitTime =< T, T =< EndTime.
+
+initiatedAt(rendezVous(Index,Index2)=true, InitTime, T, EndTime) :-
+	happensAtProcessedStaticIE(stop_start(Index2), T), InitTime =< T, T =< EndTime,
+     \+ happensAtProcessedStaticIE(gap_start(Index2), T), InitTime =< T, T =< EndTime,
+     \+ holdsAtProcessedSimpleFluent(Index2, withinArea(Index2,nearPorts)=true, T), InitTime =< T, T =< EndTime,
+	holdsAtProcessedIE(Index, proximity(Index,Index2)=true, T), InitTime =< T, T =< EndTime.
+
+initiatedAt(rendezVous(Index,Index2)=true, InitTime, T, EndTime) :-
+	happensAtProcessedStaticIE(slow_motion_start(Index2), T), InitTime =< T, T =< EndTime,
+     \+ happensAtProcessedStaticIE(gap_start(Index2), T), InitTime =< T, T =< EndTime,
+	holdsAtProcessedIE(Index, proximity(Index,Index2)=true, T), InitTime =< T, T =< EndTime.
+
+
+terminatedAt(rendezVous(Index,Index2)=true, InitTime, T, EndTime) :-
+	happensAtProcessedStaticIE(stop_end(Index), T), InitTime =< T, T =< EndTime.
+
+terminatedAt(rendezVous(Index,Index2)=true, InitTime, T, EndTime) :-
+	happensAtProcessedStaticIE(slow_motion_end(Index), T), InitTime =< T, T =< EndTime.
+
+terminatedAt(rendezVous(Index,Index2)=true, InitTime, T, EndTime) :-
+	happensAtProcessedStaticIE(stop_end(Index2), T), InitTime =< T, T =< EndTime.
+
+terminatedAt(rendezVous(Index,Index2)=true, InitTime, T, EndTime) :-
+	happensAtProcessedStaticIE(slow_motion_end(Index2), T), InitTime =< T, T =< EndTime.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+cachingOrder(Index, withinArea(Index,AreaType)=true) :-
+     vessel(Index), areaType(AreaType).
+
+cachingOrder(Index, gap(Index)=nearPort) :-
+     vessel(Index).
+
+cachingOrder(Index, gap(Index)=farFromPorts) :-
+     vessel(Index).
+
+cachingOrder(Index, stopped(Index)=nearPort) :-
+     vessel(Index).
+
+cachingOrder(Index, stopped(Index)=farFromPorts) :-
+     vessel(Index).
+
+cachingOrder(Index, lowSpeed(Index)=true) :-
+     vessel(Index).
+
+cachingOrder(Index, underWay(Index)=true) :-
+     vessel(Index).
+
+cachingOrder(Index, adrift(Index)=true) :-
+     vessel(Index).
+
+cachingOrder(Index, beforeaground(Index)=nearPort) :-
+     vessel(Index).
+
+cachingOrder(Index, beforeaground(Index)=farFromPorts) :-
+     vessel(Index).
+
+cachingOrder(Index, anchor(Index)=nearPort) :-
+     vessel(Index).
+
+cachingOrder(Index, anchor(Index)=farFromPorts) :-
+     vessel(Index).
+
+cachingOrder(Index, trawlSpeed(Index)=true) :-
+     vessel(Index).
+
+cachingOrder(Index, travelSpeed(Index)=true) :-
+     vessel(Index).
+
+cachingOrder(Index, speedLessThanMin(Index)=true) :-
+     vessel(Index).
+
+cachingOrder(Index, speedGrThanMax(Index)=true) :-
+     vessel(Index).
+
+cachingOrder(Index, rendezVous(Index,Index2)=true) :-
+	dynPair,
+	vesselPair(Index,Index2).
+
+cachingOrder(Index, rendezVous(Index,Index2)=true) :-
+	\+ dynPair,
+	vessel(Index), vessel(Index2), Index\=Index2.
+
+collectPoints(Index, proximity(Index,Index2)=true) :-
+	dynPair,
+	vesselPair(Index,Index2).
+
+collectPoints(Index, proximity(Index,Index2)=true) :-
+	\+ dynPair,
+	vessel(Index), vessel(Index2), Index\=Index2.
+
+
+areaType(anchorage).
+areaType(fishing).
+areaType(natura).
+areaType(nearCoast).
+areaType(nearCoast5k).
+areaType(nearPorts).

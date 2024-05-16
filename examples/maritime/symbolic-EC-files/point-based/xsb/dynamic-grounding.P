@@ -1,0 +1,115 @@
+
+:- import append/3 from basics.
+:- import member/2 from basics.
+
+:- dynamic vessel/1, vesselPair/2, dynPair/0.
+:- index(vessel/1, 1), index(vesselPair/2, 1+2).
+% :- table vessel/1.
+
+dynamicGrounding :-
+	% Find new vessels/cells combinations given the new SDE
+	findall(Vessel,	findNewVessels(Vessel), NewVessels0),
+	rm-dups(NewVessels0, NewVessels),
+	
+	% Check which of the old vessels need to be kept
+	findall(KeepOldVessel,
+			(
+				vessel(KeepOldVessel),
+				checkV(KeepOldVessel)
+			),
+			KeptVessels),
+	append(NewVessels,KeptVessels,UniqueVessels0), 
+	rm-dups(UniqueVessels0, UniqueVessels),
+
+	retractVessels(UniqueVessels),
+	assertVessels(UniqueVessels),
+
+	dynamicGroundingPairs.
+
+dynamicGroundingPairs :- \+ dynPair, !.
+
+dynamicGroundingPairs :-
+
+	findall((Vessel1,Vessel2), 
+			(
+				holdsForIESI(proximity(Vessel1,Vessel2)=true, (_S,_E))
+			), 
+			NewVesselPairs),
+
+	% Check which of the old vessel pairs need to be kept
+	findall((Vessel1,Vessel2),
+			(
+				vesselPair(Vessel1,Vessel2),
+				checkProx(Vessel1,Vessel2)
+			),
+			KeptVesselPairs),
+	append(NewVesselPairs,KeptVesselPairs,VP12),
+	rm-dups(VP12,UniqueVesselPairs),
+
+	retractVesselPairs(UniqueVesselPairs),
+	assertVesselPairs(UniqueVesselPairs).
+
+
+checkV(Vessel) :-
+	simpleFPList(Vessel, _, _), !.
+
+checkProx(Vessel1, Vessel2) :-
+	iePList(Vessel1, proximity(Vessel1,Vessel2) = true, _), !.
+
+checkProx(Vessel1, Vessel2) :-
+	simpleFPList(Vessel1, rendezVous(Vessel1,Vessel2) = true, _).
+
+findNewVessels(Vessel) :-
+	happensAtIE(coord(Vessel), _T).
+
+
+% If Vessel exists, but is no longer required, either based on new SDEs, 
+% or previous lists (see checkV), then retract it
+retractVessels(UniqueVessels) :-
+	findall(Vessel,
+		(
+			vessel(Vessel),
+			\+member(Vessel,UniqueVessels),
+			retract(vessel(Vessel))
+		), _), gc_dynamic(_N).
+		
+% If Vessel is required and does not exist,
+% assert it. If it exists, do nothing.
+assertVessels(UniqueVessels) :-
+	findall(Vessel,
+		(
+			member(Vessel,UniqueVessels),
+			\+ vessel(Vessel),
+			assert(vessel(Vessel))
+		), _).
+
+retractVesselPairs(UniqueVesselPairs) :-
+	findall((Vessel1,Vessel2),
+		(
+			vesselPair(Vessel1,Vessel2),
+			\+member((Vessel1,Vessel2),UniqueVesselPairs),
+			retract(vesselPair(Vessel1,Vessel2))
+		), _), gc_dynamic(_N).
+		
+% If Vessel is required and does not exist,
+% assert it. If it exists, do nothing.
+assertVesselPairs(UniqueVesselPairs) :-
+	findall((Vessel1,Vessel2),
+		(
+			member((Vessel1,Vessel2),UniqueVesselPairs),
+			\+ vesselPair(Vessel1,Vessel2),
+			assert(vesselPair(Vessel1,Vessel2))
+		), _).
+
+
+% remove duplicates
+
+rm-dups([],[]) :- !.
+rm-dups([E],[E]) :- !.
+rm-dups([Element|OtherElements],Singles) :-
+	member(Element,OtherElements), !,
+	rm-dups(OtherElements,Singles).
+	
+rm-dups([Element|OtherElements],[Element|Singles]) :-
+	rm-dups(OtherElements,Singles).
+

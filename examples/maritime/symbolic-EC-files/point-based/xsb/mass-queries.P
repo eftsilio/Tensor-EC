@@ -1,0 +1,222 @@
+
+:- import append/3 from basics.
+:- import length/2 from basics.
+
+performFullER(IEFileName, TimesFilename, ResultFilename, InitPoint, WM, Step, LastTime) :-
+  % Initialization
+  write('Initialization...'),
+  stats_init(TimesFilename, ResultFilename, TimeStream, ResultStream),
+  initialiseRecognition(ordered, nopreprocessing, 1),
+  InitWin is InitPoint + WM,
+  openInputFiles(IEFileName, IEStreams, IEPositions),
+  writeln('done.'),
+  getEvents(IEStreams, InitPoint, InitWin, IEPositions, IEPositions1),
+  InitWinPlus1 is InitWin+1,
+  write('ER: '), write(InitWin), write(' '), write(InitWinPlus1), nl,
+  dynamicGrounding,
+  inputProcessing,
+  stats_on(Son),
+  eventRecognition(InitWin,InitWinPlus1),
+  stats_off(Son, InitWin, ResultStream, [], [], [], NewCC, NewT, NewM),
+    
+  % Continue
+  CurrentTime is InitWin+Step,
+  NextInit is InitPoint + Step,
+
+  getEvents(IEStreams, NextInit, CurrentTime, IEPositions1, NewPositions),
+  querying(IEStreams, ResultStream, NewPositions, WM, Step, CurrentTime, LastTime, NewCC, NewT, NewM, FinalCC, FinalT, FinalM),
+
+  % Close/Clean-up
+  writeln('ER done. Closing/Cleaning up...'),
+  stats_end(TimeStream, ResultStream, FinalCC, FinalT, FinalM),
+  closeInputFiles(IEStreams),!.
+
+
+querying(_IEStreams, _ResultStream, _Positions, _WM, _Step, CurrentTime, LastTime, CC, Times, Mem, CC, Times, Mem) :-
+  CurrentTime > LastTime,
+  !.
+
+querying(IEStreams, ResultStream, Positions, WM, Step, CurrentTime, LastTime, CC, Times, Mem, FinalCC, FinalT, FinalM) :-
+  RemainingSteps is round((LastTime-CurrentTime)/Step),
+  write('ER: '), write(CurrentTime), write(' '), write(WM), write(' Remaining steps: '), write(RemainingSteps), nl,
+  
+  InitTime is CurrentTime-WM,
+  forget(InitTime),
+  dynamicGrounding,
+  inputProcessing,
+  stats_on(Son),
+  eventRecognition(CurrentTime, WM),
+  stats_off(Son, CurrentTime, ResultStream, CC, Times, Mem, NewCC, NewTimes, NewM),
+  NextInit is InitTime + Step,
+  
+  NewCurrentTime is CurrentTime+Step,
+
+  getEvents(IEStreams, NextInit, NewCurrentTime, Positions, NewPositions),
+  
+  querying(IEStreams, ResultStream, NewPositions, WM, Step, NewCurrentTime, LastTime, NewCC, NewTimes, NewM, FinalCC, FinalT, FinalM).
+
+    
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Event I/O Utils
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
+
+getEvents(IEStreams, Start, End, Positions, NewPositions) :-
+    loadIEStreams(IEStreams, Start, End, Positions, NewPositions), !.
+
+
+writeCEs(ResultStream, _Nq, []) :-
+    nl(ResultStream), nl(ResultStream), !.
+    
+writeCEs(ResultStream, Nq, [(F=V,L)|OtherCCs]) :-
+    makeIntervals(Nq, L, [], IL),
+    write(ResultStream, '('),
+    write(ResultStream, F),
+    write(ResultStream, '='),
+    write(ResultStream, V),
+    write(ResultStream,', '),
+    write(ResultStream, IL),
+    write(ResultStream, ').'),
+    nl(ResultStream),
+    writeCEs(ResultStream, Nq, OtherCCs), !.
+    
+openInputFiles([File], [Stream], [Position]) :-
+    open(File, read, Stream),
+    stream_property(Stream, position(Position)), !.
+    
+closeInputFiles([Stream]) :-
+    close(Stream).
+
+
+makeIntervals(Nq, [Ts], [], [(Ts, Tf)]) :-
+	Tf is Ts + 1,
+	Tf =< Nq, !.
+
+makeIntervals(Nq, [Ts], [S], [(S, Tf)]) :-
+	Tf is Ts + 1,
+	Tf =< Nq, !.
+
+makeIntervals(_Nq, [Ts], [], [(Ts, inf)]) :- !.
+
+makeIntervals(_Nq, [_Ts], [S], [(S, inf)]) :- !.
+
+makeIntervals(Nq, [Ts1, Ts2|R], [], IL) :-
+	Diff is Ts2-Ts1,
+	Diff == 1, !,
+	makeIntervals(Nq, [Ts2|R], [Ts1], IL).
+
+makeIntervals(Nq, [Ts1, Ts2|R], [S], IL) :-
+	Diff is Ts2-Ts1,
+	Diff == 1, !,
+	makeIntervals(Nq, [Ts2|R], [S], IL).
+
+makeIntervals(Nq, [Ts1, Ts2|R], [], [(Ts1, Tf)|MoreI]) :-
+	Tf is Ts1 + 1, !,
+	makeIntervals(Nq, [Ts2|R], [Ts2], MoreI).
+
+makeIntervals(Nq, [Ts1, Ts2|R], [S], [(S, Tf)|MoreI]) :-
+	Tf is Ts1 + 1,
+	makeIntervals(Nq, [Ts2|R], [Ts2], MoreI).
+	
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Statistics Utils
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% CT in microsecs
+getCPUTime(CT) :-
+    statistics(runtime, [CS, _T]),
+    CT is round(CS * 1000).
+
+stats_init(TimesFilename, ResultFilename, TimesStream, ResultStream) :-
+      open(TimesFilename, write, TimesStream),
+      open(ResultFilename, write, ResultStream).
+
+stats_on(Son) :-
+    %statistics(total_memory, [Mem, _]),
+    %statistics(heap, MemH),
+    %statistics(local, MemL),
+    %statistics(trail, MemT), Mem is round((MemH + MemL + MemT) / (1024 * 1024)), writeln(Mem),
+    getCPUTime(Son).
+
+stats_off(Son, CurrentTime, ResultStream, PrevCC, PrevT, PrevM, NewCC, NewT, NewM) :-
+    writeln('Collecting stats...'),
+    getCPUTime(Soff),
+    %statistics(total_memory, [MemOff, _]),
+    statistics(heap, MemH),
+    statistics(local, MemL),
+    statistics(trail, MemT), MemOff is MemH + MemL + MemT,
+    S is Soff-Son,
+    M is round(MemOff / (1024 * 1024)),
+    findall((F=V, T), (cachingOrder(Index, F=V), simpleFPList(Index, F=V, T)), CC),
+    update_global_vars(hles, PrevCC, CC, NewCC),
+    update_global_vars(time, PrevT, S, NewT),
+    update_global_vars(memory, PrevM, M, NewM),
+    write(ResultStream, 'ER: '), write(ResultStream, CurrentTime), nl(ResultStream), nl(ResultStream), Nq is CurrentTime + 1,
+    writeCEs(ResultStream, Nq, CC).
+
+stats_end(TimesStream, ResultStream, FinalCC, FinalT, FinalM) :-
+    writeStats(TimesStream, FinalCC, FinalT, FinalM),
+    close(TimesStream), close(ResultStream).
+
+update_global_vars(hles, HLEs, HoldsHLEs, NewHLEs):-
+  length(HoldsHLEs, HoldsNo),
+  %write('Rhles: '), writeln(HoldsNo),
+  append(HLEs, [HoldsNo], NewHLEs).
+
+update_global_vars(time, TList, Time, NewTList):-
+  append(TList, [Time], NewTList).
+
+update_global_vars(memory, MList, Memory, NewMList) :-
+  append(MList, [Memory], NewMList).
+  
+average(List, Average):-
+    sum_list(List, Sum),
+    length(List, Length),
+    Length > 0,
+    Temp is Sum * 0, Temp =:= 0,
+    Average is round(Sum / Length), !.
+
+average(_List, 0).
+
+sum_list([], 0) :- !.
+sum_list([H|T], Sum) :-
+	sum_list(T, Rest),
+	Sum is H + Rest.
+
+max_list([X], X) :- !.
+max_list([X, Y|Rest], Max) :-
+	max_list([Y|Rest], MaxRest),
+	max(X, MaxRest, Max).
+    
+writeStats(Stream, HLEs, Time, Memory):-
+  
+  sum_list(HLEs, TotalHLEs),
+  sum_list(Time, TotalTime),
+  sum_list(Memory, TotalMemory),
+
+  average(HLEs, AvgHLE),
+  average(Time, AvgT),
+  average(Memory, AvgM),
+  
+  write('Total/Average number of HLE instances: '), write(TotalHLEs), write('/'), writeln(AvgHLE),
+  
+  write('Total/Average time: '), write(TotalTime), write('/'), writeln(AvgT),
+  
+  write(Stream, 'HLEs: '), write(Stream, HLEs), nl(Stream),
+  write(Stream, 'Total/Average number of HLE instances: '),
+  write(Stream, TotalHLEs), write(Stream,'/'),
+  write(Stream, AvgHLE),
+  nl(Stream),
+  
+  write(Stream, 'Times: '), write(Stream, Time), nl(Stream),
+  write(Stream, 'Total/Average time: '), write(Stream, TotalTime), write(Stream, '/'), write(Stream, AvgT), nl(Stream),
+  max_list(Time, Max),
+  write(Stream, 'Max: '), write(Stream, Max),
+  nl(Stream),
+
+  write(Stream, 'Memory: '), write(Stream, Memory), nl(Stream),
+  write(Stream, 'Total/Average Memory: '), write(Stream, TotalMemory), write(Stream, '/'), write(Stream, AvgM), nl(Stream),
+  max_list(Memory, MaxM),
+  write(Stream, 'Max: '), write(Stream, MaxM),
+  nl(Stream).

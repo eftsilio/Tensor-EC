@@ -1,0 +1,261 @@
+/********************************************************************** DECLARATIONS *******************************************************************************
+ -Declare the entities of the event description: events, simple and statically determined fluents.
+ -For each entity state if it is input or output (simple fluents are by definition output entities).
+ -For each input/output entity state its index2.
+ *******************************************************************************************************************************************************************/
+
+%%%%%%%%%%%%%%%%%% INPUT %%%%%%%%%%%%%%%%%%
+
+event(change_in_speed_start(_)).
+inputEntity(change_in_speed_start(_)).
+grounding(change_in_speed_start(Vessel)) :- vessel(Vessel).
+
+event(change_in_speed_end(_)).
+inputEntity(change_in_speed_end(_)).
+grounding(change_in_speed_end(Vessel)) :- vessel(Vessel).
+
+event(change_in_heading(_)).
+inputEntity(change_in_heading(_)).
+grounding(change_in_heading(Vessel)) :- vessel(Vessel).
+
+event(stop_start(_)).
+inputEntity(stop_start(_)).
+grounding(stop_start(Vessel)) :- vessel(Vessel).
+
+event(stop_end(_)).
+inputEntity(stop_end(_)).
+grounding(stop_end(Vessel)) :- vessel(Vessel).
+
+event(slow_motion_start(_)).
+inputEntity(slow_motion_start(_)).
+grounding(slow_motion_start(Vessel)) :- vessel(Vessel).
+
+event(slow_motion_end(_)).
+inputEntity(slow_motion_end(_)).
+grounding(slow_motion_end(Vessel)) :- vessel(Vessel).
+
+event(gap_start(_)).
+inputEntity(gap_start(_)).
+grounding(gap_start(Vessel)) :- vessel(Vessel).
+
+event(gap_end(_)).
+inputEntity(gap_end(_)).
+grounding(gap_end(Vessel)) :- vessel(Vessel).
+
+event(entersArea_anchorage(_)).
+inputEntity(entersArea_anchorage(_)).
+grounding(entersArea_anchorage(Vessel)) :- vessel(Vessel).
+
+event(entersArea_fishing(_)).
+inputEntity(entersArea_fishing(_)).
+grounding(entersArea_fishing(Vessel)) :- vessel(Vessel).
+
+event(entersArea_natura(_)).
+inputEntity(entersArea_natura(_)).
+grounding(entersArea_natura(Vessel)) :- vessel(Vessel).
+
+event(entersArea_nearCoast(_)).
+inputEntity(entersArea_nearCoast(_)).
+grounding(entersArea_nearCoast(Vessel)) :- vessel(Vessel).
+
+event(entersArea_nearCoast5k(_)).
+inputEntity(entersArea_nearCoast5k(_)).
+grounding(entersArea_nearCoast5k(Vessel)) :- vessel(Vessel).
+
+event(entersArea_nearPorts(_)).
+inputEntity(entersArea_nearPorts(_)).
+grounding(entersArea_nearPorts(Vessel)) :- vessel(Vessel).
+
+event(leavesArea_anchorage(_)).
+inputEntity(leavesArea_anchorage(_)).
+grounding(leavesArea_anchorage(Vessel)) :- vessel(Vessel).
+
+event(leavesArea_fishing(_)).
+inputEntity(leavesArea_fishing(_)).
+grounding(leavesArea_fishing(Vessel)) :- vessel(Vessel).
+
+event(leavesArea_natura(_)).
+inputEntity(leavesArea_natura(_)).
+grounding(leavesArea_natura(Vessel)) :- vessel(Vessel).
+
+event(leavesArea_nearCoast(_)).
+inputEntity(leavesArea_nearCoast(_)).
+grounding(leavesArea_nearCoast(Vessel)) :- vessel(Vessel).
+
+event(leavesArea_nearCoast5k(_)).
+inputEntity(leavesArea_nearCoast5k(_)).
+grounding(leavesArea_nearCoast5k(Vessel)) :- vessel(Vessel).
+
+event(leavesArea_nearPorts(_)).
+inputEntity(leavesArea_nearPorts(_)).
+grounding(leavesArea_nearPorts(Vessel)) :- vessel(Vessel).
+
+event(coord(_)).
+inputEntity(coord(_)).
+grounding(coord(Vessel)) :- vessel(Vessel).
+
+event(velocity(_)).
+inputEntity(velocity(_)).
+grounding(velocity(Vessel)) :- vessel(Vessel).
+
+event(velocityGr2_7Lt48_6(_)).
+inputEntity(velocityGr2_7Lt48_6(_)).
+grounding(velocityGr2_7Lt48_6(Vessel)) :- vessel(Vessel).
+
+event(velocityGr48_6(_)).
+inputEntity(velocityGr48_6(_)).
+grounding(velocityGr48_6(Vessel)) :- vessel(Vessel).
+
+event(velocityLt2_7(_)).
+inputEntity(velocityLt2_7(_)).
+grounding(velocityLt2_7(Vessel)) :- vessel(Vessel).
+
+event(velocityAngleGr15(_)).
+inputEntity(velocityAngleGr15(_)).
+grounding(velocityAngleGr15(Vessel)) :- vessel(Vessel).
+
+event(velocityAngleLe15(_)).
+inputEntity(velocityAngleLe15(_)).
+grounding(velocityAngleLe15(Vessel)) :- vessel(Vessel).
+
+event(velocityLt0_005(_)).
+inputEntity(velocityLt0_005(_)).
+grounding(velocityLt0_005(Vessel)) :- vessel(Vessel).
+
+event(velocityGr0_005(_)).
+inputEntity(velocityGr0_005(_)).
+grounding(velocityGr0_005(Vessel)) :- vessel(Vessel).
+
+event(velocityLt0_2(_)).
+inputEntity(velocityLt0_2(_)).
+grounding(velocityLt0_2(Vessel)) :- vessel(Vessel).
+
+event(velocityGr0_2(_)).
+inputEntity(velocityGr0_2(_)).
+grounding(velocityGr0_2(Vessel)) :- vessel(Vessel).
+
+event(velocityGr1Lt9(_)).
+inputEntity(velocityGr1Lt9(_)).
+grounding(velocityGr1Lt9(Vessel)) :- vessel(Vessel).
+
+event(velocityGr9(_)).
+inputEntity(velocityGr9(_)).
+grounding(velocityGr9(Vessel)) :- vessel(Vessel).
+
+event(velocityLt1(_)).
+inputEntity(velocityLt1(_)).
+grounding(velocityLt1(Vessel)) :- vessel(Vessel).
+
+event(velocityGrMinLtMax(_)).
+inputEntity(velocityGrMinLtMax(_)).
+grounding(velocityGrMinLtMax(Vessel)) :- vessel(Vessel).
+
+event(velocityGrMax(_)).
+inputEntity(velocityGrMax(_)).
+grounding(velocityGrMax(Vessel)) :- vessel(Vessel).
+
+event(velocityLtMin(_)).
+inputEntity(velocityLtMin(_)).
+grounding(velocityLtMin(Vessel)) :- vessel(Vessel).
+
+event(velocityGeMin(_)).
+inputEntity(velocityGeMin(_)).
+grounding(velocityGeMin(Vessel)) :- vessel(Vessel).
+
+event(velocityLeMax(_)).
+inputEntity(velocityLeMax(_)).
+grounding(velocityLeMax(Vessel)) :- vessel(Vessel).
+
+sDFluent(proximity(_,_)=true).
+inputEntity(proximity(_,_)=true).
+index2(proximity(Vessel,_)=true,Vessel).
+
+%%%%%%%%%%%% OUTPUT %%%%%%%%%%%%
+
+simpleFluent(gap(_)=nearPort).
+outputEntity(gap(_)=nearPort).
+index2(gap(Vessel)=nearPort, Vessel).
+
+simpleFluent(gap(_)=farFromPorts).
+outputEntity(gap(_)=farFromPorts).
+index2(gap(Vessel)=farFromPorts, Vessel).
+
+simpleFluent(stopped(_) = nearPort).
+outputEntity(stopped(_) = nearPort).
+index2(stopped(Vessel) = nearPort, Vessel).
+
+simpleFluent(stopped(_) = farFromPorts).
+outputEntity(stopped(_) = farFromPorts).
+index2(stopped(Vessel) = farFromPorts, Vessel).
+
+simpleFluent(lowSpeed(_) = true).
+outputEntity(lowSpeed(_) = true).
+index2(lowSpeed(Vessel) = true, Vessel).
+
+simpleFluent(withinArea(_,anchorage)=true).
+outputEntity(withinArea(_,anchorage)=true).
+index2(withinArea(Vessel,anchorage)=true, Vessel).
+
+simpleFluent(withinArea(_,fishing)=true).
+outputEntity(withinArea(_,fishing)=true).
+index2(withinArea(Vessel,fishing)=true, Vessel).
+
+simpleFluent(withinArea(_,natura)=true).
+outputEntity(withinArea(_,natura)=true).
+index2(withinArea(Vessel,natura)=true, Vessel).
+
+simpleFluent(withinArea(_,nearCoast)=true).
+outputEntity(withinArea(_,nearCoast)=true).
+index2(withinArea(Vessel,nearCoast)=true, Vessel).
+
+simpleFluent(withinArea(_,nearCoast5k)=true).
+outputEntity(withinArea(_,nearCoast5k)=true).
+index2(withinArea(Vessel,nearCoast5k)=true, Vessel).
+
+simpleFluent(withinArea(_,nearPorts)=true).
+outputEntity(withinArea(_,nearPorts)=true).
+index2(withinArea(Vessel,nearPorts)=true, Vessel).
+
+simpleFluent(underWay(_)=true).
+outputEntity(underWay(_)=true).
+index2(underWay(Vessel)=true, Vessel).
+
+simpleFluent(adrift(_)=true).
+outputEntity(adrift(_)=true).
+index2(adrift(Vessel)=true, Vessel).
+
+simpleFluent(anchor(_)=nearPort).
+outputEntity(anchor(_)=nearPort).
+index2(anchor(Vessel)=nearPort, Vessel).
+
+simpleFluent(anchor(_)=farFromPorts).
+outputEntity(anchor(_)=farFromPorts).
+index2(anchor(Vessel)=farFromPorts, Vessel).
+
+simpleFluent(beforeaground(_) = nearPort).
+outputEntity(beforeaground(_) = nearPort).
+index2(beforeaground(Vessel) = nearPort, Vessel).
+
+simpleFluent(beforeaground(_) = farFromPorts).
+outputEntity(beforeaground(_) = farFromPorts).
+index2(beforeaground(Vessel) = farFromPorts, Vessel).
+
+simpleFluent(trawlSpeed(_)=true).
+outputEntity(trawlSpeed(_)=true).
+index2(trawlSpeed(Vessel)=true, Vessel).
+
+simpleFluent(speedLessThanMin(_)=true).
+outputEntity(speedLessThanMin(_)=true).
+index2(speedLessThanMin(Vessel)=true, Vessel).
+
+simpleFluent(speedGrThanMax(_)=true).
+outputEntity(speedGrThanMax(_)=true).
+index2(speedGrThanMax(Vessel)=true, Vessel).
+
+simpleFluent(travelSpeed(_)=true).
+outputEntity(travelSpeed(_)=true).
+index2(travelSpeed(Vessel)=true, Vessel).
+
+simpleFluent(rendezVous(_,_)=true).
+outputEntity(rendezVous(_,_)=true).
+index2(rendezVous(Vessel,_)=true, Vessel).

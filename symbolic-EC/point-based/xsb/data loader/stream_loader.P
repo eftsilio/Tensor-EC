@@ -1,0 +1,110 @@
+:- ['manual_csv_read.P'].
+    
+loadIEStreams([_Stream], _StartPoint, _EndPoint, [end_of_file], [end_of_file]) :- !.
+
+loadIEStreams([Stream], StartPoint, EndPoint, [StreamPosition], [NewStreamPosition]) :-
+    !,
+    % set Stream as input
+    set_input(Stream),
+    loadSingleIEStream(Stream, StartPoint, EndPoint, StreamPosition, NewStreamPosition).
+
+loadIEStreams([_Stream|Streams], StartPoint, EndPoint, [end_of_file|SPs], [end_of_file|NSPs]) :-
+    !, loadIEStreams(Streams, StartPoint, EndPoint, SPs, NSPs).
+
+loadIEStreams([Stream|Streams], StartPoint, EndPoint, [StreamPosition|SPs], [NewStreamPosition|NSPs]) :-
+    % set Stream as input
+    set_input(Stream),
+    loadSingleIEStream(Stream, StartPoint, EndPoint, StreamPosition, NewStreamPosition),
+    loadIEStreams(Streams, StartPoint, EndPoint, SPs, NSPs).
+    
+
+loadSingleIEStream(Stream, StartPoint, EndPoint, StreamPosition, NewStreamPosition) :-
+    % does not exist in yap
+    %csv_read_file_row(Stream,Row,[line(Line),separator(0'|)]),
+    % so, use manual_csv_reader instead
+    get_row_from_line(Stream, Row, StreamPosition, NextStreamPosition),
+    % write('Processing row: '),writeln(Row),
+    getRowArgument(2, Row, IEArrivalTime),
+    processRow(Row, StartPoint, EndPoint, IEArrivalTime, ProcessingOutcome),
+    (
+        ProcessingOutcome = passed_endpoint, !,
+        % the StreamPosition does not change
+        NewStreamPosition = StreamPosition
+        ;
+        ProcessingOutcome = end_of_file, !,
+        NewStreamPosition = end_of_file
+        ;
+        loadSingleIEStream(Stream, StartPoint, EndPoint, NextStreamPosition, NewStreamPosition)
+    ).
+
+processRow([], _StartPoint, _EndPoint, _IEArrivalTime, end_of_file) :- !.
+    
+processRow(_Row, StartPoint, _EndPoint, IEArrivalTime, keep_processing) :-
+    StartPoint >= IEArrivalTime, !.
+    
+processRow(Row, StartPoint, EndPoint, IEArrivalTime, ProcessingOutcome) :-
+    StartPoint < IEArrivalTime,
+    (
+        EndPoint >= IEArrivalTime, !,
+        ProcessingOutcome = keep_processing,
+        getIEFromRowandAssertIt(Row)
+        ;
+        ProcessingOutcome = passed_endpoint
+    ).
+        
+        
+% getIEFromRowandAssertIt(+Row)
+% distill the input entity from Row and assert in the RTEC format
+getIEFromRowandAssertIt(Row) :-
+    % IElabel becomes the first argument of Row
+    getRowArgument(1, Row, IElabel),
+    (
+        % check whether the given input entity is an event
+        event(E), E=..[IElabel|_], inputEntity(E), !,
+        % assertEvent(+Row),
+        % distill from Row the event instance and assert it
+        assertEvent(Row)
+        ;
+        % check whether the given input entity is a statically determined fluent
+        inputEntity(F=V), F=..[IElabel|_], sDFluent(F=V), !,
+        % assertFluent(+Row)
+        % distill from Row the fluent instance and assert it
+        assertFluent(Row)
+    ).
+
+% Row contains neither an input event
+% not an input statically determined fluent
+getIEFromRowandAssertIt(_Row).
+
+
+% getRowArgument(+N, +Row, -Arg)
+% return the Nth argument of row
+% the built-in arg/3 raises exception in case of
+% empty row, and thus we had to address this
+getRowArgument(_N, [], []) :- !.
+getRowArgument(N, Row, Arg) :-
+    arg(N, Row, Arg).
+    
+
+assertEvent(Row) :-
+	% get rid of row atom and Arrival time 
+	Row =.. [_RowAtom|[EventLabel|[_ArrivalTime|[OccurenceTime|EventAttributes]]]],
+	Event =.. [EventLabel|EventAttributes],
+	assert( happensAtIE(Event, OccurenceTime) ), !.
+
+% the event arrival time or occurrence time is missing
+assertEvent(Row) :-
+	write('ERROR IN INPUT CSV; LINE: '), writeln(Row).
+
+
+% distill from Row the durative instance of Fluent=Value and assert it in the RTEC format 
+assertFluent(Row) :-
+	% get rid of row atom and arrival time 
+	Row =.. [_RowAtom|[FluentLabel|[_ArrivalTime|[StartOccurenceTime|[EndOccurenceTime|[Value|FluentAttributes]]]]]],
+	Fluent =.. [FluentLabel|FluentAttributes],
+	assert( holdsForIESI(Fluent=Value, (StartOccurenceTime,EndOccurenceTime)) ), !.
+
+% the fluent in the CSV file is not consistent with the declarations of the event description
+% Note: we do not check the attributes of the fluent
+assertFluent(Row) :-
+	write('ERROR IN INPUT CSV; LINE: '), writeln(Row).

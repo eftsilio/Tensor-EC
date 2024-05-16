@@ -1,0 +1,10 @@
+
+%:- set_global_compiler_options([auto_table, suppl_table]).
+
+:- ['../../../../../symbolic-EC/point-based/xsb/EC.P'].
+:- ['../../../../../symbolic-EC/point-based/xsb/data loader/stream_loader.P'].
+:- ['./mass-queries.P'].
+:- ['./dynamic-grounding.P'].
+:- ['./patterns.P'].
+:- ['./declarations.P'].
+

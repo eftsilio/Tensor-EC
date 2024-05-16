@@ -1,0 +1,131 @@
+
+:- import append/3 from basics.
+:- import member/2 from basics.
+
+processSimpleFluent(Index, F=V, InitTime, QueryTime) :-
+	%writeln((F=V)),
+	isThereASimpleFPList(Index, F=V, ExtendedPList),
+	setTheSceneSimpleFluent(InitTime, ExtendedPList, StPoint),
+	% compute the starting points within (Qi-WM,Qi]
+	computeStartingPoints(F=V, InitTime, QueryTime, SP),
+	addPoint(StPoint, SP, CSP),
+	% compute new time-points
+	holdsForSimpleFluent(F=V, InitTime, QueryTime, CSP, HT),
+	updatesimpleFPList(Index, F=V, HT).
+
+
+isThereASimpleFPList(Index, F=V, ExtendedPList) :-
+	simpleFPList(Index, F=V, ExtendedPList), !,
+	retract(simpleFPList(Index, F=V, _)),
+	gc_dynamic(_N).
+
+% this predicate deals with the case where no time-points for F=V were computed at the previous query time
+isThereASimpleFPList(_Index, _U, []).
+
+
+addPoint([], L, L) :- !.
+addPoint([P], L, [P|L]).
+
+
+updatesimpleFPList(_Index, _U, []) :- !.
+
+updatesimpleFPList(Index, F=V, NewPeriods) :-
+	assert(simpleFPList(Index, F=V, NewPeriods)).
+
+
+setTheSceneSimpleFluent(InitTime, ExtendedPList, [Nt]) :-
+	nextTimePoint(InitTime, Nt),
+	member(Nt, ExtendedPList), !.
+
+setTheSceneSimpleFluent(_InitTime, _ExtendedPList, []).
+
+
+/****** compute starting points ******/
+
+computeStartingPoints(F=V, InitTime, QueryTime, SP) :-
+	setof(T, initList(F=V, InitTime, T, QueryTime), SP), !.
+
+computeStartingPoints(_U, _InitTime, _QueryTime, []).
+
+initList(F=V, InitTime, T, QueryTime):-
+	initiatedAt(F=V, InitTime, Tp, QueryTime),
+	nextTimePoint(Tp, T).	
+
+
+/****** compute ending points ******/
+
+computeEndingPoints(F=V, InitTime, QueryTime, TP) :-
+	setof(T, terminList(F=V, InitTime, T, QueryTime), TP), !.
+
+computeEndingPoints(_U, _InitTime, _QueryTime, []).
+
+terminList(F=V, InitTime, T, QueryTime) :-
+	terminatedAt(F=V, InitTime, Tp, QueryTime),
+	nextTimePoint(Tp, T).
+
+
+/****** compute new intervals given the computed starting and ending points ******/
+
+holdsForSimpleFluent(_U, _InitTime, _QueryTime, [], []) :- !.
+
+holdsForSimpleFluent(F=V, InitTime, QueryTime, SP, HT) :-
+	% compute the ending points within (Qi-WM,Qi]
+	computeEndingPoints(F=V, InitTime, QueryTime, TP),
+	nextTimePoint(QueryTime, Nq),
+	nextTimePoint(Nq, Nq2),
+	makeIntervalsFromSEPoints(Nq2, SP, TP, HT0),
+	holdsAtCE(HT0, HT).
+	
+
+holdsAtCE([], []) :- !.
+
+holdsAtCE([(S,E)|RI], Points) :-
+	holdsAtCE2(S, E, SomeP),
+	holdsAtCE(RI, MoreP), append(SomeP, MoreP, Points).
+
+holdsAtCE2(S, E, []) :-
+	S >= E, !.
+
+holdsAtCE2(S, E, [S|R]) :-
+	nextTimePoint(S, S2),
+	holdsAtCE2(S2, E, R).
+
+
+makeIntervalsFromSEPoints(_Nq, [], _EPoints, []) :- !.
+
+% base cases: single initiation point
+makeIntervalsFromSEPoints(_Nq, [Ts], EPoints, Period) :-
+    member(Tf, EPoints), 
+    Ts=<Tf, 
+    (
+        Ts=Tf, !, 
+        Period=[]
+        ;   
+        %Ts<Tf
+        !, Period=[(Ts,Tf)]
+    ).
+makeIntervalsFromSEPoints(Nq, [Ts], _EPoints, [(Ts,Nq)]) :- !.   
+% recursion: at least two initiation points
+makeIntervalsFromSEPoints(Nq, [T|MoreTs], [T|MoreTf], Periods) :-
+    !, makeIntervalsFromSEPoints(Nq, MoreTs, MoreTf, Periods).
+makeIntervalsFromSEPoints(Nq, [Ts|MoreTs], [Tf|MoreTf], Periods) :-
+    Tf<Ts, !, 
+    makeIntervalsFromSEPoints(Nq, [Ts|MoreTs], MoreTf, Periods).
+makeIntervalsFromSEPoints(Nq, [Ts,T|MoreTs], [T|MoreTf], Periods) :-
+    %Ts<Tf,  
+    %Tf=Tnext, 
+    !, makeIntervalsFromSEPoints(Nq, [Ts|MoreTs], [T|MoreTf], Periods).
+    %!, makeIntervalsFromSEPoints(Nq, [Ts|MoreTs], MoreTf, Periods).
+makeIntervalsFromSEPoints(Nq, [Ts,Tnext|MoreTs], [Tf|MoreTf], [(Ts,Tf)|MorePeriods]) :-
+    %Ts<Tf,  
+    Tf<Tnext, !,
+    makeIntervalsFromSEPoints(Nq, [Tnext|MoreTs], MoreTf, MorePeriods).
+makeIntervalsFromSEPoints(Nq, [Ts,_Tnext|MoreTs], [Tf|MoreTf], Periods) :-
+    %Ts<Tnext<Tf,  
+    !, makeIntervalsFromSEPoints(Nq, [Ts|MoreTs], [Tf|MoreTf], Periods).
+
+makeIntervalsFromSEPoints(Nq, [Ts,_Tnext|_MoreTs], _EPoints, [(Ts,Nq)]).
+
+
+
+	
