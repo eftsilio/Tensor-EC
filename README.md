@@ -15,7 +15,8 @@ Tensor-EC is implemented in Python and is tensted under Python 3.11.4, NumPy 1.2
 To run the source code of each method you have to enter the corresponding directory, \`./symbolic-EC' for the logic implementation of EC and `./Tensor-EC' for the tensor method, open a terminal and type the following command:
 
 ```python
-$ python3 run-exps.py```
+$ python3 run-exps.py
+```
 
 The results will be saved in the following directories for each method:
 - Symbolic-EC: `./examples/maritime/data/results/symbolic-EC'
