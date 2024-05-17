@@ -10,7 +10,9 @@ Tensor-EC comes with ABSOLUTELY NO WARRANTY. This is free software, and you are 
 
 Symbolic-EC is the symbolical implementation of EC and is written in XSB Prolog. You will need to install XSB Prolog 5.0.0 in your system before running this code.
 
-Tensor-EC is implemented in Python and is tensted under Python 3.11.4, NumPy 1.25.2 and SciPy 1.10.1. A subset of the public dataset of Brest is provided as a csv file and can be found in the folder `./examples/maritime/brest/data/dynamic_data'. The first time you will run the code, you need to unzip the file found in the aforemetnioned directory.
+Tensor-EC is implemented in Python and is tested under Python 3.11.4, NumPy 1.25.2 and SciPy 1.10.1. 
+
+The composite event recognition (CER) process involves the computation and caching of all time-points at which fluent-value pairs, expressing CEs, hold. On the field of maritime monitoring, CER concerns the recognition of composite maritime events. A subset of the public dataset of Brest is provided as a csv file and can be found in the folder `./examples/maritime/brest/data/dynamic_data'. The first time you will run the code, you need to unzip the file found in the aforemetnioned directory.
 
 To run the source code of each method you have to enter the corresponding directory, \`./symbolic-EC' for the logic implementation of EC and `./Tensor-EC' for the tensor method, open a terminal and type the following command:
 
