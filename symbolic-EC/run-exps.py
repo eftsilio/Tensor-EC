@@ -21,12 +21,7 @@ times = {'b': [1443650401, 1445378401, [3600, 7200, 14400, 28800], 10],
 	 'i': [1451606400, 1451806411, [2000, 500, 1000, 2000], 30],
 	 't': [1443650401, 1443650512, [10], 100]}
 
-eventFlow = False
-
-if eventFlow:
-	xsb_command = ['/home/eftsilio/programs/XSB/bin/xsb', '--noprompt', '--quietload', '--nobanner', '-c', '150g', '-m', '150g', '-o', '100g', '--nofeedback', '-e']
-else:
-	xsb_command = ['/home/eftsilio/Desktop/XSB/bin/xsb', '--noprompt', '--quietload', '--nobanner', '-c', '5g', '-m', '5g', '-o', '2g', '--nofeedback', '-e']
+xsb_command = ['xsb', '--noprompt', '--quietload', '--nobanner', '-c', '5g', '-m', '5g', '-o', '2g', '--nofeedback', '-e']
 
 
 def main(args):
