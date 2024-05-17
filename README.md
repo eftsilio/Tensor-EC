@@ -20,7 +20,7 @@ $ python3 run-exps.py
 
 The results will be saved in the following directories for each method:
 - Symbolic-EC: `./examples/maritime/data/results/symbolic-EC'
-- Tensor-EC: ./examples/maritime/data/results/Tensor-EC'
+- Tensor-EC: `./examples/maritime/data/results/Tensor-EC'
 
 # Documentation
 
