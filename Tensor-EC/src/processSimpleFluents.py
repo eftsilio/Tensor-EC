@@ -140,7 +140,7 @@ class SimpleFluent(EventRecognition):
 				vector_b = ((initiations - initiations.multiply(terminations)) @ self.U)
 				vector_b = vector_b.reshape(shape, order='C').A
 				vector_t = np.reshape(terminations.A, newshape=(shape[0],), order='C')
-				vector_t = -1.0 + vector_t[1:]
+				vector_t = -1.0 + vector_t[:-1]
 
 				matrix_G = sp.diags([[1.0], vector_t], offsets=[0, -1], shape=(shape[0], shape[0]), format='csc')
 
